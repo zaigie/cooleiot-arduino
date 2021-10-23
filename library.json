@@ -1,0 +1,19 @@
+{
+    "name": "CoolE",
+    "keywords": "arduino, iot, esp32",
+    "description": "CoolE IoT Platform Library. Works with ESP8266, ESP32.",
+    "authors": [
+        {
+            "name": "jokerwho",
+            "url": "https://github.com/jokerwho",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jokerwho/cooleiot-arduino.git"
+    },
+    "frameworks": "arduino",
+    "platforms": "*",
+    "version": "0.0.1"
+}
