@@ -230,6 +230,7 @@ void CoolE::start()
 
 void CoolE::stop()
 {
+  mqttclient.unsubscribe(_topic.c_str());
   mqttclient.disconnect();
 }
 
@@ -271,7 +272,10 @@ void CoolE::updateReport(String field, String data)
   }
   report[field] = data;
   serializeJson(report, _report_content);
-  field_num++;
+  if (!report.containsKey(field))
+  {
+    field_num++;
+  }
 }
 void CoolE::updateReport(String field, const char* data)
 {
@@ -282,7 +286,10 @@ void CoolE::updateReport(String field, const char* data)
   }
   report[field] = data;
   serializeJson(report, _report_content);
-  field_num++;
+  if (!report.containsKey(field))
+  {
+    field_num++;
+  }
 }
 void CoolE::updateReport(String field, int data)
 {
@@ -293,7 +300,10 @@ void CoolE::updateReport(String field, int data)
   }
   report[field] = data;
   serializeJson(report, _report_content);
-  field_num++;
+  if (!report.containsKey(field))
+  {
+    field_num++;
+  }
 }
 void CoolE::updateReport(String field, float data)
 {
@@ -304,7 +314,10 @@ void CoolE::updateReport(String field, float data)
   }
   report[field] = data;
   serializeJson(report, _report_content);
-  field_num++;
+  if (!report.containsKey(field))
+  {
+    field_num++;
+  }
 }
 void CoolE::updateReport(String field, byte data)
 {
@@ -315,7 +328,10 @@ void CoolE::updateReport(String field, byte data)
   }
   report[field] = data;
   serializeJson(report, _report_content);
-  field_num++;
+  if (!report.containsKey(field))
+  {
+    field_num++;
+  }
 }
 
 String CoolE::getContent(String field){
@@ -341,7 +357,7 @@ void CoolE::publish()
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   serializeJson(report, _publish_content);
   String publish_data = "{\"report\":" + _publish_content + "}";
@@ -355,7 +371,7 @@ void CoolE::publish(String field)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   if (!report.containsKey(field))
   {
@@ -375,7 +391,7 @@ void CoolE::publish(String key, String value, enum MessageType type)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   String publish_data = type == STRING ? "{\"" + key + "\":" + "\"" + value + "\"" + "}" : "{\"" + key + "\":" + value + "}";
   mqttclient.publish(_topic.c_str(), publish_data.c_str());
@@ -385,7 +401,7 @@ void CoolE::publish(String field, String payload)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   doc[field] = payload;
   serializeJson(doc, _publish_content);
@@ -399,7 +415,7 @@ void CoolE::publish(String field, const char* payload)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   doc[field] = payload;
   serializeJson(doc, _publish_content);
@@ -413,7 +429,7 @@ void CoolE::publish(String field, int payload)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   doc[field] = payload;
   serializeJson(doc, _publish_content);
@@ -427,7 +443,7 @@ void CoolE::publish(String field, float payload)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   doc[field] = payload;
   serializeJson(doc, _publish_content);
@@ -441,7 +457,7 @@ void CoolE::publish(String field, byte payload)
 {
   if (millis() - last_publish_time < 1000 && last_publish_time != 0)
   {
-    delay(millis() - last_publish_time);
+    delay(1000 - (millis() - last_publish_time));
   }
   doc[field] = payload;
   serializeJson(doc, _publish_content);
