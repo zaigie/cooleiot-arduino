@@ -25,7 +25,7 @@ void setup()
   DisplayDisconnect();
   // IoT部分
   iot.setDebug(true);
-  iot.start("{ssid}", "{pswd}");
+  iot.start();
 }
 
 void loop()

@@ -20,7 +20,9 @@
 #if defined(ESP32)
 #include <WiFi.h>
 #endif
+#ifndef WITHOUT_WEB
 #include "modules/ESPAsyncWiFiManager/ESPAsyncWiFiManager.h"
+#endif
 #include "modules/ArduinoHttpClient/ArduinoHttpClient.h"
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
@@ -87,7 +89,7 @@ CoolE::CoolE(const char *developkey)
 {
   _developkey = developkey;
 }
-
+#ifndef WITHOUT_WEB
 void CoolE::init()
 {
   Serial.begin(115200);
@@ -153,6 +155,7 @@ void CoolE::init()
     _client_id = "coole-device-" + String(_device_id) + '-' + get32ChipID();
   #endif
 }
+#endif
 
 void CoolE::init(const char *ssid, const char *pswd)
 {
@@ -222,9 +225,17 @@ void CoolE::connect()
   }
 }
 
+#ifndef WITHOUT_WEB
 void CoolE::start()
 {
   init();
+  connect();
+}
+#endif
+
+void CoolE::start(const char *ssid, const char *pswd)
+{
+  init(ssid, pswd);
   connect();
 }
 

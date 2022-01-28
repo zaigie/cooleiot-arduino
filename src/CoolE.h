@@ -32,8 +32,10 @@ public:
   /* 构造函数 */
   CoolE(const char* developkey);
 
+  #ifndef WITHOUT_WEB
   /* 配置设备初始化并连接到网络(推荐) */
   void init();
+  #endif
 
   /* 自定义WIFI信息连接 */
   void init(const char *ssid,const char *pswd);
@@ -41,8 +43,13 @@ public:
   /* 连接MQTT */
   void connect();
 
+  #ifndef WITHOUT_WEB
   /* 开始IoT */
   void start();
+  #endif
+
+  /* 开始IoT(自定义WIFI) */
+  void start(const char *ssid,const char *pswd);
 
   /* MQTT接收循环 */
   void loop();
