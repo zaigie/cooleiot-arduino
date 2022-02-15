@@ -24,7 +24,7 @@ void setup()
   updateDHT();
   DisplayDisconnect();
   // IoT部分
-  iot.setDebug(true);
+  iot.setDebug();
   iot.start("{ssid}", "{pswd}");
 }
 
@@ -35,11 +35,11 @@ void loop()
   // IoT部分
   iot.loop();
   recv = iot.getRevContent();
-  // Serial.println(recv);
   handleGet();
   handleCommand();
   handleContent();
-  delay(100);
+  // IoT处理
+  iot.next();
 }
 
 void handleGet(){

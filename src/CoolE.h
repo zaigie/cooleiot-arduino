@@ -4,7 +4,21 @@
 
 #ifndef CoolE_h
 #define CoolE_h
+
 #include "Arduino.h"
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
+
+#if defined(ESP32)
+#include <WiFi.h>
+#endif
+#ifndef WITHOUT_WEB
+#include "modules/ESPAsyncWiFiManager/ESPAsyncWiFiManager.h"
+#endif
+#include "modules/ArduinoHttpClient/ArduinoHttpClient.h"
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
 
 enum MessageType{
   NORMAL = 0,
@@ -20,7 +34,7 @@ enum DecodeType{
 
 void callback(char* topic, byte* payload, unsigned int length);
 #if !defined(ESP8266)
-static String byteToHexStr(uint8_t *buf, uint8_t length, String strSeperator); // byteToHexString
+// static String byteToHexStr(uint8_t *buf, uint8_t length, String strSeperator = "-");
 String get32ChipID();
 #endif
 class CoolE
@@ -33,6 +47,8 @@ public:
   CoolE(const char* developkey);
 
   #ifndef WITHOUT_WEB
+  /* 自定义AP热点 */
+  void setMyAP(const char *ap_name, const char *ap_pswd = "");
   /* 配置设备初始化并连接到网络(推荐) */
   void init();
   #endif
@@ -101,11 +117,8 @@ public:
   /* 获取数字类型的云配置 */
   float getNumConfig(String field);
 
-  /* 打印MQTT接收的数据，调试用，与iot.getRevContent()不能同时使用，需打印请使用Serial.println(iot.getRevContent()) */
-  static void printRev();
-
   /* 设置debug状态 */
-  void setDebug(bool result);
+  void setDebug(bool is_debug = true);
 
   /* DEBUG */
   template <typename Generic>
@@ -113,9 +126,14 @@ public:
 
   /* MQTT Callback内容处理 */
   static String rev_content;
-  static String rev_content_temp;
+  // static uint64_t last_recived_time;
   static void setRevContent(String content);
   static String getRevContent();
+  /* 打印MQTT接收的数据*/
+  static void printRev(String content);
+  /* IoT 结尾部分 */
+  static unsigned int retry_times;
+  static void next();
 
   /* WIFI状态处理 */
   bool wifistatus();
@@ -127,6 +145,8 @@ private:
   const char* _developkey;           // 设备Developkey
   const char* _device_id;            // 设备ID
   const char* _username;             // 用户名
+  const char* _ap_name;              // 设备ID
+  const char* _ap_pswd;              // 用户名
   String _topic;                     // 设备Topic
   String _client_id;                 // 设备Client-ID
   String _content_content;           // 所有内容字段信息

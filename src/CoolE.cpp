@@ -13,20 +13,6 @@
 
 #include "CoolE.h"
 
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-#endif
-
-#if defined(ESP32)
-#include <WiFi.h>
-#endif
-#ifndef WITHOUT_WEB
-#include "modules/ESPAsyncWiFiManager/ESPAsyncWiFiManager.h"
-#endif
-#include "modules/ArduinoHttpClient/ArduinoHttpClient.h"
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-
 const char* api_server = "api.cooleiot.tech";
 int api_port = 80;
 const char *server = "broker.cooleiot.tech";
@@ -47,20 +33,21 @@ void callback(char *topic, byte *payload, unsigned int length)
   {
     content += *((const char *)p);
   }
+  CoolE::printRev(content);
   CoolE::setRevContent(content);
 }
 
 String CoolE::rev_content = "";
-String CoolE::rev_content_temp = "";
+// uint64_t CoolE::last_recived_time = 0;
 void CoolE::setRevContent(String content)
 {
   rev_content = content;
+  // last_recived_time = millis();
 }
 String CoolE::getRevContent()
 {
-  if (rev_content != rev_content_temp && rev_content != NULL)
+  if (rev_content != NULL)  // && (millis() - last_recived_time) >= 500
   {
-    rev_content_temp = rev_content;
     return rev_content;
   }
   else
@@ -68,14 +55,39 @@ String CoolE::getRevContent()
     return "";
   }
 }
-
-void CoolE::printRev()
+void CoolE::printRev(String content)
 {
-  if (rev_content != rev_content_temp && rev_content != NULL)
-  {
-    Serial.println(rev_content);
-    rev_content_temp = rev_content;
+  Serial.print(F("*Rev: "));
+  Serial.print(millis());
+  Serial.print("->");
+  Serial.println(content);
+}
+unsigned int CoolE::retry_times = 0;
+void CoolE::next(){
+  rev_content = "";
+  if (WiFi.status() != WL_CONNECTED) {
+    WiFi.reconnect();
+    while (WiFi.status() != WL_CONNECTED) {
+      if (retry_times % 5 == 0) {
+        Serial.print("*CoolE: WiFi已断开，正在重连，若");
+        Serial.print(30 - retry_times);
+        Serial.println("s后仍无连接将重启设备...");
+      }
+      retry_times++;
+      delay(1000);
+      if (retry_times > 30) {
+        #if defined(ESP8266)
+          ESP.reset(); //重置
+        #endif
+        #if defined(ESP32)
+            ESP.restart(); //重置
+        #endif
+      }
+    }
+    retry_times = 0;
+    Serial.println("*CoolE: WiFi重连成功");
   }
+  delay(100);
 }
 
 void CoolE::setClearWiFi()
@@ -90,6 +102,11 @@ CoolE::CoolE(const char *developkey)
   _developkey = developkey;
 }
 #ifndef WITHOUT_WEB
+void CoolE::setMyAP(const char *ap_name, const char *ap_pswd){
+  _ap_name = ap_name;
+  _ap_pswd = ap_pswd;
+}
+
 void CoolE::init()
 {
   Serial.begin(115200);
@@ -109,7 +126,18 @@ void CoolE::init()
   wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);       // 设置固定AP信息
   wifiManager.setBreakAfterConfig(true);                // 设置 如果配置错误的ssid或者密码 退出配置模式
   wifiManager.setRemoveDuplicateAPs(true);              // 设置过滤重复的AP 默认可以不用调用 这里只是示范
-  if (!wifiManager.autoConnect(_device_id, "cooleiot")) // 尝试连接网络，失败去到配置页面
+  #if defined(ESP8266)
+    String ap_name = "coole_" + ESP.getChipId();
+    String ap_pswd = "";
+  #else
+    String ap_name = "coole_" + get32ChipID();
+    String ap_pswd = "";
+  #endif
+  if (String(_ap_name) != "") {
+    ap_name = String(_ap_name);
+    ap_pswd = String(_ap_pswd);
+  }
+  if (!wifiManager.autoConnect(ap_name.c_str(), ap_pswd.c_str())) // 尝试连接网络，失败去到配置页面
   {
     debug("连接失败，准备重启尝试");
 #if defined(ESP8266)
@@ -253,6 +281,11 @@ bool CoolE::wifistatus()
 void CoolE::loop()
 {
   mqttclient.loop();
+  if (!mqttclient.connected()) {
+    if (WiFi.status() == WL_CONNECTED){
+      connect();
+    }
+  }
 }
 
 void CoolE::clearReport()
@@ -589,9 +622,9 @@ float CoolE::getNumConfig(String field){
 }
 
 
-void CoolE::setDebug(bool result)
+void CoolE::setDebug(bool is_debug)
 {
-  _is_debug = result;
+  _is_debug = is_debug;
 }
 
 template <typename Generic>

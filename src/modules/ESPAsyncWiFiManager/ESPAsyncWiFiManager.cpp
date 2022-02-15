@@ -117,16 +117,17 @@ void AsyncWiFiManager::setupConfigPortal()
   _configPortalStart = millis();
 
   DEBUG_WM(F("正在配置访问点... "));
-  DEBUG_WM(_apName);
+  DEBUG_WM("热点名称: " + String(_apName));
   if (_apPassword != NULL)
   {
     if (strlen(_apPassword) < 8 || strlen(_apPassword) > 63)
     {
       // fail passphrase to short or long!
-      DEBUG_WM(F("无效的访问点密码，忽略"));
+      DEBUG_WM(F("AP热点未设置密码"));
       _apPassword = NULL;
+    }else {
+      DEBUG_WM("热点密码: " + String(_apPassword));
     }
-    DEBUG_WM(_apPassword);
   }
 
   // optional soft ip config
@@ -441,7 +442,7 @@ void AsyncWiFiManager::copySSIDInfo(wifi_ssid_count_t n)
         {
           if (cssid == wifiSSIDs[j].SSID)
           {
-            DEBUG_WM("DUP AP: " + wifiSSIDs[j].SSID);
+            // DEBUG_WM("DUP AP: " + wifiSSIDs[j].SSID);
             wifiSSIDs[j].duplicate = true; // set dup aps to NULL
           }
         }
