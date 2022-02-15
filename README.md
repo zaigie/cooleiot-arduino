@@ -13,13 +13,13 @@ CoolE iot("{developkey}");
 
 ```cpp
 /* 设置debug状态 */
-void setDebug(bool result);
+void setDebug(bool is_debug = true);
 ```
 
 使用：
 
 ```cpp
-iot.setDebug(true);
+iot.setDebug();
 ```
 
 ### iot.getRevContent
@@ -146,6 +146,21 @@ void loop();
 
 ```cpp
 iot.loop();
+```
+
+### iot.next
+
+```cpp
+/* IoT 结尾部分 */
+static void next();
+```
+
+> 该函数放在`loop()`最底部，用于处理消息重复接收逻辑以及断网重连，为必须，若不加该函数，将会导致不可预见的问题
+
+使用：
+
+```cpp
+iot.next();
 ```
 
 ### iot.stop
