@@ -176,9 +176,9 @@ public:
                             IPAddress dns1 = (uint32_t)0x00000000,
                             IPAddress dns2 = (uint32_t)0x00000000);
   //在AP模式和配置门户启动时调用
-  void setAPCallback(void (*func)(AsyncWiFiManager *));
+  void setAPCallback(std::function<void(AsyncWiFiManager *)>);
   //当设置已更改且连接成功时调用
-  void setSaveConfigCallback(void (*func)(void));
+  void setSaveConfigCallback(std::function<void()> func);
   //添加自定义参数，失败时返回false
   void addParameter(AsyncWiFiManagerParameter *p);
   //如果设置了此选项，即使连接失败，它也会在配置后退出。
@@ -191,6 +191,13 @@ public:
   void setRemoveDuplicateAPs(boolean removeDuplicates);
   // sets a custom element to add to options page
   void setCustomOptionsElement(const char *element);
+
+  String getConfiguredSTASSID(){
+      return _ssid;
+  }
+  String getConfiguredSTAPassword(){
+      return _pass;
+  }
 
 private:
   AsyncWebServer *server;
@@ -277,8 +284,8 @@ private:
 
   boolean _tryConnectDuringConfigPortal = true;
 
-  void (*_apcallback)(AsyncWiFiManager *) = NULL;
-  void (*_savecallback)(void) = NULL;
+  std::function<void(AsyncWiFiManager *)> _apcallback;
+  std::function<void()> _savecallback;
 
   AsyncWiFiManagerParameter *_params[WIFI_MANAGER_MAX_PARAMS];
 

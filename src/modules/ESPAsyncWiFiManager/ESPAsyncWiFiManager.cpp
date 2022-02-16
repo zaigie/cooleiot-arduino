@@ -644,8 +644,10 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       DEBUG_WM(F("正在连接到新的AP"));
 
       // using user-provided _ssid, _pass in place of system-stored ssid and pass
-      if (connectWifi(_ssid, _pass) == WL_CONNECTED)
+      WiFi.persistent(true);
+      if (_tryConnectDuringConfigPortal and connectWifi(_ssid, _pass) == WL_CONNECTED)
       {
+        WiFi.persistent(false);
         // connected
         WiFi.mode(WIFI_STA);
         // notify that configuration has changed and any optional parameters should be saved
@@ -658,7 +660,8 @@ boolean AsyncWiFiManager::startConfigPortal(char const *apName, char const *apPa
       }
       else
       {
-        DEBUG_WM(F("连接失败"));
+        if(_tryConnectDuringConfigPortal)
+          DEBUG_WM(F("连接失败"));
       }
 
       if (_shouldBreakAfterConfig)
@@ -1266,13 +1269,13 @@ boolean AsyncWiFiManager::captivePortal(AsyncWebServerRequest *request)
 }
 
 // start up config portal callback
-void AsyncWiFiManager::setAPCallback(void (*func)(AsyncWiFiManager *myAsyncWiFiManager))
+void AsyncWiFiManager::setAPCallback(std::function<void(AsyncWiFiManager *)> func)
 {
   _apcallback = func;
 }
 
 // start up save config callback
-void AsyncWiFiManager::setSaveConfigCallback(void (*func)(void))
+void AsyncWiFiManager::setSaveConfigCallback(std::function<void()> func)
 {
   _savecallback = func;
 }
