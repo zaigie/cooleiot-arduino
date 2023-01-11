@@ -1,6 +1,8 @@
 # cooleiot-arduino
  CoolE IoT Platform Library. Works with ESP8266, ESP32.
 
+> 项目已迁移到 [https://github.com/cooleiot/arduino-sdk](https://github.com/cooleiot/arduino-sdk)
+
 ## 实例
 
 实例化IoT连接，须填入设备的DevelopKey
